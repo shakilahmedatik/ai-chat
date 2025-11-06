@@ -1,0 +1,114 @@
+# ---------------------------
+# Node & package managers
+# ---------------------------
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Keep lockfiles committed (important for reproducible builds)
+!pnpm-lock.yaml
+!**/pnpm-lock.yaml
+!package-lock.json
+!yarn.lock
+
+# ---------------------------
+# TypeScript
+# ---------------------------
+*.tsbuildinfo
+
+# ---------------------------
+# Build outputs
+# ---------------------------
+dist/
+**/dist/
+build/
+**/build/
+out/
+**/out/
+
+# ---------------------------
+# Next.js
+# ---------------------------
+.next/
+**/.next/
+.vercel/
+**/.vercel/
+
+# If you use next export
+# out/ is already covered above
+
+# ---------------------------
+# Tests & coverage
+# ---------------------------
+coverage/
+**/coverage/
+.nyc_output/
+.jest/
+.tap/
+
+# ---------------------------
+# Env & secrets
+# ---------------------------
+.env
+.env.*
+**/.env
+**/.env.*
+# Keep example env files
+!.env.example
+!**/.env.example
+!**/.env*.example
+
+# ---------------------------
+# Logs, pids
+# ---------------------------
+logs/
+**/logs/
+*.log
+*.log.*
+*.pid
+*.pid.lock
+
+# ---------------------------
+# Caches
+# ---------------------------
+.cache/
+**/.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# ---------------------------
+# IDE/editor
+# ---------------------------
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.iml
+
+# ---------------------------
+# OS junk
+# ---------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ---------------------------
+# Docker (local artifacts)
+# ---------------------------
+docker-data/
+**/.docker/
+*.local.yml
+
+# ---------------------------
+# Temporary & misc
+# ---------------------------
+tmp/
+temp/
+*.swp
+*.swo
+*.local
