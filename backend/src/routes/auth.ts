@@ -15,10 +15,11 @@ const router = Router()
 const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60
 
 function setAuthCookies(res: any, accessToken: string, refreshToken: string) {
+  const isLocal = process.env.NODE_ENV !== 'production'
   const common = {
     httpOnly: true,
-    secure: true,
-    sameSite: 'lax' as const,
+    secure: !isLocal,
+    sameSite: isLocal ? 'lax' : 'none',
     path: '/',
   }
   res.cookie('accessToken', accessToken, { ...common })
