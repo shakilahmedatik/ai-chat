@@ -15,15 +15,20 @@ const router = Router()
 const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60
 
 function setAuthCookies(res: any, accessToken: string, refreshToken: string) {
-  const isLocal = process.env.NODE_ENV !== 'production'
+  const isProd = process.env.NODE_ENV === 'production'
+
   const common = {
     httpOnly: true,
-    secure: !isLocal,
-    sameSite: isLocal ? 'lax' : 'none',
+    secure: true, // Railway is HTTPS, so this is correct
+    sameSite: 'none' as const, // allow cross-site cookies
     path: '/',
   }
-  res.cookie('accessToken', accessToken, { ...common })
-  res.cookie('refreshToken', refreshToken, { ...common })
+
+  // If later you use a custom domain for both API + web, you can optionally add:
+  // domain: '.yourdomain.com'
+
+  res.cookie('accessToken', accessToken, common)
+  res.cookie('refreshToken', refreshToken, common)
 }
 
 router.post('/register', async (req, res) => {
