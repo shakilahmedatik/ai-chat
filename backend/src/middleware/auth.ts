@@ -23,7 +23,8 @@ export async function requireAuth(
 
     req.user = { id: payload.sub, sessionId: payload.sid }
     next()
-  } catch {
-    return res.status(401).json({ message: 'Unauthorized' })
+  } catch (err) {
+    console.log(err)
+    return res.status(401).json({ message: 'Unauthorized!!' })
   }
 }

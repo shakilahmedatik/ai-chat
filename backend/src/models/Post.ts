@@ -7,8 +7,11 @@ export interface IPost extends Document {
   content: string
   isFlagged: boolean
   aiFlags?: {
-    spam?: boolean
-    toxicity?: boolean
+    toxic?: boolean
+    insult?: boolean
+    obscene?: boolean
+    threat?: boolean
+    identity_hate?: boolean
     reason?: string
   }
   createdAt: Date
@@ -23,8 +26,11 @@ const postSchema = new Schema<IPost>(
     content: { type: String, required: true },
     isFlagged: { type: Boolean, default: false },
     aiFlags: {
-      spam: Boolean,
-      toxicity: Boolean,
+      toxic: { type: String },
+      insult: { type: String },
+      obscene: { type: String },
+      threat: { type: String },
+      identity_hate: { type: String },
       reason: String,
     },
   },

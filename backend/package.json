@@ -10,6 +10,7 @@
     "worker:start": "node dist/worker/index.js"
   },
   "dependencies": {
+    "@huggingface/inference": "^4.13.2",
     "@upstash/redis": "^1.35.6",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",

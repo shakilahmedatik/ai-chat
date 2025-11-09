@@ -8,10 +8,10 @@ import {
   verifyRefreshToken,
 } from '../lib/jwt'
 import { setSession, delSession, getSession } from '../lib/redis'
-import { AuthRequest } from '../middleware/auth'
+import { AuthRequest, requireAuth } from '../middleware/auth'
 
 const router = Router()
-const ACCESS_TTL_SECONDS = 15 * 60
+// const ACCESS_TTL_SECONDS = 15 * 60
 const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60
 
 function setAuthCookies(res: any, accessToken: string, refreshToken: string) {
@@ -26,7 +26,7 @@ function setAuthCookies(res: any, accessToken: string, refreshToken: string) {
 }
 
 router.post('/register', async (req, res) => {
-  const { email, username, password } = req.body
+  const { email, username, password, avatarUrl } = req.body
   if (!email || !username || !password) {
     return res.status(400).json({ message: 'Missing fields' })
   }
@@ -37,7 +37,12 @@ router.post('/register', async (req, res) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 10)
-  const user = await User.create({ email, username, passwordHash })
+  const user = await User.create({
+    email,
+    username,
+    passwordHash,
+    avatarUrl,
+  })
 
   const sid = uuid()
   const accessToken = signAccessToken({ sub: user.id, sid })
@@ -47,7 +52,10 @@ router.post('/register', async (req, res) => {
 
   setAuthCookies(res, accessToken, refreshToken)
 
-  res.status(201).json({ user: { id: user.id, email, username } })
+  res.status(201).json({
+    user: { id: user.id, email, username },
+    accessToken,
+  })
 })
 
 router.post('/login', async (req, res) => {
@@ -69,9 +77,15 @@ router.post('/login', async (req, res) => {
   await setSession(`session:${sid}`, { userId: user.id }, REFRESH_TTL_SECONDS)
 
   setAuthCookies(res, accessToken, refreshToken)
-
   res.json({
-    user: { id: user.id, email: user.email, username: user.username },
+    user: {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      roles: user.roles,
+      avatarUrl: user.avatarUrl,
+    },
+    accessToken,
   })
 })
 
@@ -122,12 +136,13 @@ router.post('/logout', async (req: AuthRequest, res) => {
   res.json({ ok: true })
 })
 
-router.get('/me', async (req: AuthRequest, res) => {
+router.get('/me', requireAuth, async (req: AuthRequest, res) => {
   // This endpoint should be behind requireAuth in index.ts router mounting
   if (!req.user) return res.status(401).json({ message: 'Unauthorized' })
   const user = await User.findById(req.user.id).select(
-    'id email username avatarUrl bio role'
+    'id email username avatarUrl bio roles'
   )
+
   res.json({ user })
 })
 

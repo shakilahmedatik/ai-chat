@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    /* Output */
+    "outDir": "dist",
+    "rootDir": "src",
+    "noEmitOnError": true,
+
+    /* Language & runtime target
+       Node 24 supports ES2022+ features comfortably. */
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+
+    /* Interop / imports */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Libs
+       ES2022 includes modern Error types (fixes Upstash ErrorOptions). */
+    "lib": ["ES2022"],
+
+    /* Type checking */
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

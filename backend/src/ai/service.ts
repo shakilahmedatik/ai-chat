@@ -1,89 +1,87 @@
 import { env } from '../env'
-import { Post } from '../models/Post'
-import { Thread } from '../models/Thread'
-import fetch from 'node-fetch' // if not in deps, add it
+import { hf } from './hfClient'
 
-export async function moderateText(content: string): Promise<{
-  allowed: boolean
-  spam?: boolean
-  toxicity?: boolean
-  reason?: string
-}> {
-  if (!env.HF_MODERATION_URL || !env.HF_TOKEN) {
-    // fallback: allow all in dev/demo
-    return { allowed: true }
-  }
-
+export async function summarizeThread(prompt: string): Promise<string | null> {
   try {
-    const response = await fetch(env.HF_MODERATION_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.HF_TOKEN}`,
-        'Content-Type': 'application/json',
+    const result = await hf.summarization({
+      model: env.HF_SUMMARIZATION_MODEL,
+      inputs: prompt,
+      parameters: {
+        max_length: 100,
+        min_length: 60,
       },
-      body: JSON.stringify({ inputs: content }),
     })
+    const summary = result.summary_text
 
-    const result: any = await response.json()
-
-    // This mapping depends on chosen model.
-    // Keep it simple: if model predicts high "toxic" or "spam", block.
-    const output = Array.isArray(result) ? result[0] : result
-    const toxic = output?.labels?.includes('toxic')
-    const spam = output?.labels?.includes('spam')
-
-    if (toxic || spam) {
-      return {
-        allowed: false,
-        toxicity: !!toxic,
-        spam: !!spam,
-        reason: 'Flagged by AI moderation',
-      }
-    }
-
-    return { allowed: true }
-  } catch (e) {
-    console.error('moderateText error', e)
-    // fail-open for assignment simplicity
-    return { allowed: true }
+    if (!summary) return null
+    return summary
+  } catch (error) {
+    console.error('Summarization API error:', error)
+    throw new Error('Failed to generate summary via API.')
   }
 }
 
-export async function summarizeThread(
-  threadId: string
-): Promise<string | null> {
-  if (!env.HF_SUMMARIZE_URL || !env.HF_TOKEN) return null
-
-  const posts = await Post.find({ threadId }).sort({ createdAt: 1 }).limit(50)
-
-  if (!posts.length) return null
-
-  const text = posts.map(p => p.content).join('\n\n')
-
-  const prompt = `Summarize the following discussion in 3-5 concise sentences, focusing on key issues & solutions:\n\n${text}`
-
+export async function moderateText(text: string): Promise<{
+  allowed: boolean
+  toxic?: boolean
+  insult?: boolean
+  obscene?: boolean
+  threat?: boolean
+  identity_hate?: boolean
+  flaggedCategories?: {
+    label: string
+    score: number
+  }[]
+  action?: 'APPROVE' | 'REQUIRES_REVIEW' | 'APPROVE_FALLBACK'
+  reason?: string
+}> {
   try {
-    const response = await fetch(env.HF_SUMMARIZE_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.HF_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ inputs: prompt }),
+    // Use the textClassification method
+    const result = await hf.textClassification({
+      model: env.HF_MODERATION_MODEL,
+      inputs: text,
     })
 
-    const result: any = await response.json()
-    const summary =
-      Array.isArray(result) && result[0]?.summary_text
-        ? result[0].summary_text
-        : result?.generated_text || null
+    const toxicityThreshold = 0.8
 
-    if (!summary) return null
+    // The result is an array of labels/scores, similar to the local pipeline
+    const flaggedResults = result
+      .filter(item => item.score > toxicityThreshold)
+      .map(item => ({
+        label: item.label,
+        score: item.score,
+      }))
 
-    await Thread.findByIdAndUpdate(threadId, { summary })
-    return summary
-  } catch (e) {
-    console.error('summarizeThread error', e)
-    return null
+    // ... (rest of the moderation logic remains the same) ...
+    if (flaggedResults.length > 0) {
+      const toxic = flaggedResults.some(flag => flag.label === 'toxic')
+      const insult = flaggedResults.some(flag => flag.label === 'insult')
+      const obscene = flaggedResults.some(flag => flag.label === 'obscene')
+      const threat = flaggedResults.some(flag => flag.label === 'threat')
+      const identity_hate = flaggedResults.some(
+        flag => flag.label === 'identity_hate'
+      )
+
+      return {
+        allowed: false,
+        toxic,
+        insult,
+        obscene,
+        threat,
+        identity_hate,
+        flaggedCategories: flaggedResults,
+        action: 'REQUIRES_REVIEW',
+        reason: 'Flagged by AI moderation',
+      }
+    } else {
+      return {
+        allowed: true,
+        action: 'APPROVE',
+      }
+    }
+  } catch (error) {
+    console.error('AI Moderation API error:', error)
+    // Important: Handle API failure gracefully, don't block user content
+    return { allowed: true, action: 'APPROVE_FALLBACK' }
   }
 }

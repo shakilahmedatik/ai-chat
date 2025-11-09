@@ -1,8 +1,8 @@
 import 'express-async-error'
-import * as express from 'express'
+import express from 'express'
 import * as http from 'http'
-import * as cookieParser from 'cookie-parser'
-import * as cors from 'cors'
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
 import { Server } from 'socket.io'
 
 import { env } from './env'
@@ -12,10 +12,17 @@ import threadRoutes from './routes/threads'
 import postsRoutes from './routes/posts'
 import notificationsRoutes from './routes/notifications'
 import { verifyAccessToken } from './lib/jwt'
-import { getSession } from './lib/redis'
+import { checkRedisConnection, getSession } from './lib/redis'
 
 async function bootstrap() {
   await connectDB()
+  const redisOk = await checkRedisConnection()
+  if (!redisOk) {
+    // you can either:
+    // - throw to fail fast
+    // - or just log a warning and continue
+    console.error('Redis is not reachable. Check Upstash URL/TOKEN.')
+  }
 
   const app = express()
   const server = http.createServer(app)
@@ -53,12 +60,14 @@ async function bootstrap() {
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth?.accessToken
+
       if (!token) return next(new Error('No token'))
 
       const payload = verifyAccessToken(token)
       if (payload.type !== 'access') return next(new Error('Invalid token'))
 
       const session = await getSession(`session:${payload.sid}`)
+
       if (!session) return next(new Error('Session expired'))
       ;(socket as any).user = { id: payload.sub }
       next()
@@ -82,14 +91,9 @@ async function bootstrap() {
     })
 
     socket.on('disconnect', () => {
-      // nothing fancy needed
+      // nothing needed
     })
   })
-
-  // Utility: whenever a post is created via REST, you can emit from there.
-  // Example:
-  // after Post.create in posts route:
-  //   io.to(`thread:${threadId}`).emit("new_post", sanitizedPost);
 
   // Expose io globally for route files if you want:
   ;(global as any).io = io
