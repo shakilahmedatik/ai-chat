@@ -102,7 +102,7 @@ router.post(
           type: 'mention',
           title: `You were mentioned by ${author?.username || 'someone'}`,
           message: `mentioned you in "${thread.title}"`,
-          link: `/${threadId}#post-${post._id}`,
+          link: `/thread/${threadId}#post-${post._id}`,
         })
 
         notifiedUserIds.add(targetId)

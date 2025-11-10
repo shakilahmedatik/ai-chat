@@ -37,7 +37,7 @@ async function bootstrap() {
   // Middleware
   app.use(
     cors({
-      origin: [env.CLIENT_ORIGIN],
+      origin: [env.CLIENT_ORIGIN, 'http://localhost:3000'],
       credentials: true,
     })
   )
