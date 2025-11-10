@@ -146,4 +146,42 @@ router.post(
   }
 )
 
+// POST /api/posts/:postId/flag
+router.post(
+  '/posts/:postId/flag',
+  requireAuth,
+  async (req: AuthRequest, res) => {
+    const { postId } = req.params
+    const { reason } = req.body
+
+    if (!reason || !reason.trim()) {
+      return res
+        .status(400)
+        .json({ message: 'Reason is required for flagging.' })
+    }
+
+    const post = await Post.findById(postId)
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found.' })
+    }
+
+    // prevent duplicate spam from same user (optional but smart)
+    const alreadyFlagged = post.flags.some(
+      f => f.userId.toString() === req.user!.id
+    )
+    if (!alreadyFlagged) {
+      post.flags.push({
+        userId: req.user!.id as any,
+        reason: reason.trim(),
+        createdAt: new Date(),
+      } as any)
+    }
+
+    post.isFlagged = true
+    await post.save()
+
+    return res.json({ ok: true })
+  }
+)
+
 export default router

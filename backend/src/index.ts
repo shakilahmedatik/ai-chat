@@ -13,6 +13,7 @@ import notificationsRoutes from './routes/notifications'
 import { verifyAccessToken } from './lib/jwt'
 import { checkRedisConnection, getSession } from './lib/redis'
 import adminWebhookRoutes from './routes/admin.webhooks'
+import moderationRoutes from './routes/moderation'
 
 async function bootstrap() {
   await connectDB()
@@ -50,6 +51,7 @@ async function bootstrap() {
   app.use('/api', postsRoutes)
   app.use('/api', notificationsRoutes)
   app.use('/api', adminWebhookRoutes)
+  app.use('/api', moderationRoutes)
 
   // Basic error handler
   app.use((err: any, _req: any, res: any, _next: any) => {

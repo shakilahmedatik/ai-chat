@@ -1,11 +1,18 @@
 import { Schema, model, Document, Types } from 'mongoose'
 
+interface IFlag {
+  userId: Types.ObjectId
+  reason: string
+  createdAt: Date
+}
+
 export interface IPost extends Document {
   threadId: Types.ObjectId
   parentId?: Types.ObjectId
   authorId: Types.ObjectId
   content: string
   isFlagged: boolean
+  flags: IFlag[]
   aiFlags?: {
     toxic?: boolean
     insult?: boolean
@@ -14,9 +21,19 @@ export interface IPost extends Document {
     identity_hate?: boolean
     reason?: string
   }
+  status: 'active' | 'removed'
   createdAt: Date
   updatedAt: Date
 }
+
+const flagSchema = new Schema<IFlag>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    reason: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+)
 
 const postSchema = new Schema<IPost>(
   {
@@ -25,6 +42,7 @@ const postSchema = new Schema<IPost>(
     authorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: true },
     isFlagged: { type: Boolean, default: false },
+    flags: { type: [flagSchema], default: [] },
     aiFlags: {
       toxic: { type: String },
       insult: { type: String },
@@ -32,6 +50,11 @@ const postSchema = new Schema<IPost>(
       threat: { type: String },
       identity_hate: { type: String },
       reason: String,
+    },
+    status: {
+      type: String,
+      enum: ['active', 'removed'],
+      default: 'active',
     },
   },
   { timestamps: true }
