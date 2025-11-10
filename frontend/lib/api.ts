@@ -5,7 +5,9 @@ import {
   WebhookDelivery,
   FlaggedPost,
   AdminStats,
+  Profile,
 } from './types'
+import { ProfileInput } from './schemas'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
@@ -279,4 +281,32 @@ export async function getAdminDashboard() {
   return apiCall<{ stats: AdminStats; flaggedPosts: FlaggedPost[] }>(
     '/api/admin/dashboard'
   )
+}
+
+export async function getMyProfile() {
+  return apiCall<Profile>('/api/profile/me')
+}
+
+export async function updateMyProfile(data: ProfileInput) {
+  return apiCall<{ ok: boolean; displayName: string; bio: string }>(
+    '/api/profile/me',
+    {
+      method: 'PUT',
+      body: data,
+    }
+  )
+}
+
+export async function uploadAvatarImage(imageBase64: string) {
+  return apiCall<{ ok: boolean; avatarUrl: string }>('/api/profile/avatar', {
+    method: 'POST',
+    body: { imageBase64 },
+  })
+}
+
+export async function uploadRegisterAvatar(imageBase64: string) {
+  return apiCall<{ avatarUrl: string }>('/auth/avatar', {
+    method: 'POST',
+    body: { imageBase64 },
+  })
 }

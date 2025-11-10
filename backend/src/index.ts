@@ -15,6 +15,7 @@ import { checkRedisConnection, getSession } from './lib/redis'
 import adminWebhookRoutes from './routes/admin.webhooks'
 import moderationRoutes from './routes/moderation'
 import adminDashboardRoutes from './routes/admin.dashboard'
+import profileRoutes from './routes/profile'
 
 async function bootstrap() {
   await connectDB()
@@ -43,7 +44,18 @@ async function bootstrap() {
       credentials: true,
     })
   )
-  app.use(express.json())
+  app.use(
+    express.json({
+      limit: '5mb', // or '10mb' if you want to match your UI hint
+    })
+  )
+
+  app.use(
+    express.urlencoded({
+      extended: true,
+      limit: '5mb',
+    })
+  )
   app.use(cookieParser())
 
   // Routes
@@ -53,6 +65,8 @@ async function bootstrap() {
   app.use('/api', notificationsRoutes)
   app.use('/api', adminWebhookRoutes)
   app.use('/api', moderationRoutes)
+
+  app.use('/api', profileRoutes)
 
   app.use('/api', adminDashboardRoutes)
 

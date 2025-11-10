@@ -90,3 +90,14 @@ export interface AdminStats {
   flaggedPosts: number
   activeUsers: number
 }
+
+export type Profile = {
+  id: string
+  username: string
+  email: string
+  displayName: string
+  bio: string
+  avatarUrl: string
+  roles: string[]
+  createdAt: string
+}

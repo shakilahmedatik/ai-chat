@@ -9,6 +9,7 @@ import {
 } from '../lib/jwt'
 import { setSession, delSession, getSession } from '../lib/redis'
 import { AuthRequest, requireAuth } from '../middleware/auth'
+import axios from 'axios'
 
 const router = Router()
 // const ACCESS_TTL_SECONDS = 15 * 60
@@ -30,6 +31,47 @@ function setAuthCookies(res: any, accessToken: string, refreshToken: string) {
   res.cookie('accessToken', accessToken, common)
   res.cookie('refreshToken', refreshToken, common)
 }
+
+router.post('/avatar', async (req, res) => {
+  const { imageBase64 } = req.body
+
+  if (!imageBase64) {
+    return res.status(400).json({ message: 'imageBase64 is required' })
+  }
+
+  const apiKey = process.env.IMGBB_API_KEY
+  if (!apiKey) {
+    return res.status(500).json({ message: 'IMGBB_API_KEY not configured' })
+  }
+
+  try {
+    const form = new URLSearchParams()
+    form.append('image', imageBase64)
+
+    const response = await axios.post(
+      `https://api.imgbb.com/1/upload?key=${apiKey}`,
+      form.toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        timeout: 10000,
+      }
+    )
+
+    const url = response.data?.data?.url
+    if (!url) {
+      return res
+        .status(500)
+        .json({ message: 'Failed to upload image to imgbb' })
+    }
+
+    return res.json({ avatarUrl: url })
+  } catch (err: any) {
+    console.error('IMGBB upload error', err?.message || err)
+    return res.status(500).json({ message: 'Failed to upload avatar' })
+  }
+})
 
 router.post('/register', async (req, res) => {
   const { email, username, password, avatarUrl } = req.body
