@@ -159,13 +159,15 @@ export function ThreadDetail({ thread, posts }: ThreadDetailProps) {
             {summarizing ? 'Summarizing...' : ' Summarize'}
           </Button>
 
-          <Button variant='outline' size='sm' className='gap-2 bg-transparent'>
+          <Button
+            variant='outline'
+            size='sm'
+            className='gap-2 bg-transparent cursor-pointer'
+            disabled
+            title='Coming Soon'
+          >
             <Share2 className='h-4 w-4' />
             Share
-          </Button>
-          <Button variant='outline' size='sm' className='gap-2 bg-transparent'>
-            <Flag className='h-4 w-4' />
-            Report
           </Button>
         </CardContent>
       </Card>

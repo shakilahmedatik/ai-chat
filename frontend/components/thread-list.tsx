@@ -8,13 +8,7 @@ import { TagFilter } from '@/components/tag-filter'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDebounce } from '@/hooks/use-debounce'
@@ -127,21 +121,6 @@ export function ThreadList({ tag }: ThreadListProps) {
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
-          </div>
-          <div className='w-full md:w-40'>
-            <label className='text-sm font-medium mb-2 block'>Sort by</label>
-            <Select
-              value={sort}
-              onValueChange={value => setSort(value as SortOption)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='recent'>Most Recent</SelectItem>
-                <SelectItem value='active'>Most Active</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 

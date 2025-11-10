@@ -23,11 +23,11 @@ import { useAuth } from '@/hooks/use-auth'
 
 // Mock trending tags data
 const trendingTags = [
-  { name: 'react', count: 342 },
-  { name: 'javascript', count: 298 },
-  { name: 'typescript', count: 256 },
-  { name: 'nextjs', count: 189 },
-  { name: 'ai', count: 167 },
+  { name: 'react' },
+  { name: 'javascript' },
+  { name: 'typescript' },
+  { name: 'nextjs' },
+  { name: 'ai' },
 ]
 
 interface NavItem {
@@ -124,13 +124,10 @@ function SidebarContent() {
                 <Link key={tag.name} href={`/tags/${tag.name}`}>
                   <Button
                     variant='ghost'
-                    className='w-full justify-between'
+                    className='w-full justify-between cursor-pointer'
                     size='sm'
                   >
                     <span className='text-sm'>{tag.name}</span>
-                    <Badge variant='secondary' className='text-xs'>
-                      {tag.count}
-                    </Badge>
                   </Button>
                 </Link>
               ))}
