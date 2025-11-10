@@ -83,3 +83,10 @@ export interface FlaggedPost {
   reason: string
   createdAt: string
 }
+
+export interface AdminStats {
+  totalThreads: number
+  totalPosts: number
+  flaggedPosts: number
+  activeUsers: number
+}

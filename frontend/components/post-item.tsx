@@ -1,15 +1,12 @@
 'use client'
-
-import type { Post } from '@/lib/types'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Flag, Reply, Sparkles } from 'lucide-react'
+import { Flag, Reply } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
-import { PostReplyForm } from '@/components/post-reply-form'
 import {
   AlertDialog,
   AlertDialogAction,

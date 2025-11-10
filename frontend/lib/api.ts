@@ -1,5 +1,11 @@
 import axios, { AxiosError } from 'axios'
-import { Notification, Webhook, WebhookDelivery, FlaggedPost } from './types'
+import {
+  Notification,
+  Webhook,
+  WebhookDelivery,
+  FlaggedPost,
+  AdminStats,
+} from './types'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
@@ -267,4 +273,10 @@ export async function flagPost(postId: string, reason: string) {
     method: 'POST',
     body: { reason },
   })
+}
+
+export async function getAdminDashboard() {
+  return apiCall<{ stats: AdminStats; flaggedPosts: FlaggedPost[] }>(
+    '/api/admin/dashboard'
+  )
 }
