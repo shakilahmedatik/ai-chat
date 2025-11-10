@@ -4,7 +4,6 @@ import * as http from 'http'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { Server } from 'socket.io'
-
 import { env } from './env'
 import { connectDB } from './lib/db'
 import authRoutes from './routes/auth'
@@ -13,6 +12,7 @@ import postsRoutes from './routes/posts'
 import notificationsRoutes from './routes/notifications'
 import { verifyAccessToken } from './lib/jwt'
 import { checkRedisConnection, getSession } from './lib/redis'
+import adminWebhookRoutes from './routes/admin.webhooks'
 
 async function bootstrap() {
   await connectDB()
@@ -49,6 +49,7 @@ async function bootstrap() {
   app.use('/api', threadRoutes)
   app.use('/api', postsRoutes)
   app.use('/api', notificationsRoutes)
+  app.use('/api', adminWebhookRoutes)
 
   // Basic error handler
   app.use((err: any, _req: any, res: any, _next: any) => {

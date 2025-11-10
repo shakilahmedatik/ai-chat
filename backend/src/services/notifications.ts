@@ -3,6 +3,7 @@ import {
   INotification,
   NotificationType,
 } from '../models/Notification'
+import { triggerWebhooksForNotification } from './webhooks'
 
 export type NotificationDto = {
   id: string
@@ -48,11 +49,16 @@ export async function createAndEmitNotification(input: {
     message: input.message,
     link: input.link,
   })
+  const dto = toNotificationDto(notif)
 
+  // Realtime to in-app user
   const io = (global as any).io
   if (io) {
-    io.to(`user:${input.userId}`).emit('notification', toNotificationDto(notif))
+    io.to(`user:${input.userId}`).emit('notification', dto)
   }
+
+  // 🔗 trigger outbound webhooks for this notification
+  await triggerWebhooksForNotification(dto)
 
   return notif
 }
