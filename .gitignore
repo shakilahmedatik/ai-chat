@@ -77,6 +77,8 @@ logs/
 # ---------------------------
 .cache/
 **/.cache/
+.turbo/
+**/.turbo/
 .parcel-cache/
 .eslintcache
 .stylelintcache
